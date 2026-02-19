@@ -107,4 +107,29 @@ public class DataRetriever {
         }
         return totals;
     }
+
+    public Double computeWeightedTurnover() {
+        Double weightedTotal = 0.0;
+        String sql = "SELECT " +
+                "    SUM(CASE " +
+                "        WHEN i.status = 'PAID' THEN il.quantity * il.unit_price * 1.0 " +
+                "        WHEN i.status = 'CONFIRMED' THEN il.quantity * il.unit_price * 0.5 " +
+                "        WHEN i.status = 'DRAFT' THEN il.quantity * il.unit_price * 0.0 " +
+                "        ELSE 0 " +
+                "    END) AS weighted_total " +
+                "FROM " +
+                "    invoice i " +
+                "JOIN " +
+                "    invoice_line il ON i.id = il.invoice_id;";
+        try (Connection connection = new DbConnection().getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                weightedTotal = rs.getDouble("weighted_total");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return weightedTotal;
+    }
 }

@@ -18,5 +18,9 @@ public class Main {
         System.out.println("total_paid = " + statusTotals.getTotalPaid());
         System.out.println("total_confirmed = " + statusTotals.getTotalConfirmed());
         System.out.println("total_draft = " + statusTotals.getTotalDraft());
+
+
+        Double weightedTurnover = retriever.computeWeightedTurnover();
+        System.out.println(weightedTurnover);
     }
 }
