@@ -163,4 +163,34 @@ public class DataRetriever {
         }
         return summaries;
     }
+
+
+    public BigDecimal computeWeightedTurnoverTtc() {
+        BigDecimal weightedTotal = BigDecimal.ZERO;
+        String sql = "SELECT " +
+                "    SUM(CASE " +
+                "        WHEN i.status = 'PAID' THEN il.quantity * il.unit_price * 1.0 " +
+                "        WHEN i.status = 'CONFIRMED' THEN il.quantity * il.unit_price * 0.5 " +
+                "        WHEN i.status = 'DRAFT' THEN il.quantity * il.unit_price * 0.0 " +
+                "        ELSE 0 " +
+                "    END) * (1 + tc.rate / 100) AS weighted_ttc " +
+                "FROM " +
+                "    invoice i " +
+                "JOIN " +
+                "    invoice_line il ON i.id = il.invoice_id " +
+                "CROSS JOIN " +
+                "    tax_config tc " +
+                "WHERE " +
+                "    tc.label = 'TVA STANDARD' group by tc.rate;";
+        try (Connection connection = new DbConnection().getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                weightedTotal = rs.getBigDecimal("weighted_ttc");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return weightedTotal;
+    }
 }

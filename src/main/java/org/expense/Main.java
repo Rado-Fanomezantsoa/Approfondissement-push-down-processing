@@ -1,5 +1,6 @@
 package org.expense;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -7,8 +8,8 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         DataRetriever retriever = new DataRetriever();
-        System.out.println("test question 1/2");
-        List<InvoiceTotal> invoiceTotals = retriever.findInvoiceTotals();
+
+        /*List<InvoiceTotal> invoiceTotals = retriever.findInvoiceTotals();
 
         for (InvoiceTotal total : invoiceTotals) {
             System.out.println(total);
@@ -31,5 +32,8 @@ public class Main {
         for (InvoiceTaxSummary summary : summaries) {
             System.out.println(summary);
         }
+*/
+        BigDecimal weightedTurnoverTtc = retriever.computeWeightedTurnoverTtc();
+        System.out.println(weightedTurnoverTtc);
     }
 }
