@@ -132,4 +132,35 @@ public class DataRetriever {
         }
         return weightedTotal;
     }
+
+    public List<InvoiceTaxSummary> findInvoiceTaxSummaries() {
+        List<InvoiceTaxSummary> summaries = new ArrayList<>();
+        String sql = "SELECT " +
+                "    i.id, " +
+                "    COALESCE(SUM(il.quantity * il.unit_price), 0) AS ht, " +
+                "    COALESCE(SUM(il.quantity * il.unit_price), 0) * (SELECT rate FROM tax_config WHERE label = 'TVA STANDARD') / 100 AS tva, " +
+                "    COALESCE(SUM(il.quantity * il.unit_price), 0) * (1 + (SELECT rate FROM tax_config WHERE label = 'TVA STANDARD') / 100) AS ttc " +
+                "FROM " +
+                "    invoice i " +
+                "LEFT JOIN " +
+                "    invoice_line il ON i.id = il.invoice_id " +
+                "GROUP BY " +
+                "    i.id " +
+                "ORDER BY " +
+                "    i.id;";
+        try (Connection connection = new DbConnection().getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                BigDecimal ht = rs.getBigDecimal("ht");
+                BigDecimal tva = rs.getBigDecimal("tva");
+                BigDecimal ttc = rs.getBigDecimal("ttc");
+                summaries.add(new InvoiceTaxSummary(id, ht, tva, ttc));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return summaries;
+    }
 }

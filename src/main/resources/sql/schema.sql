@@ -10,3 +10,8 @@ CREATE TABLE invoice_line (
     quantity INT NOT NULL,
     unit_price NUMERIC(10,2) NOT NULL
     );
+CREATE TABLE tax_config (
+                            id SERIAL PRIMARY KEY,
+                            label VARCHAR NOT NULL,
+                            rate NUMERIC(5,2) NOT NULL
+);
