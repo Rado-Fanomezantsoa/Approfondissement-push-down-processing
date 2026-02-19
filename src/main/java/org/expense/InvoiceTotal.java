@@ -35,6 +35,6 @@ public class InvoiceTotal {
     // Override toString to match the expected display format (id | name | total)
     @Override
     public String toString() {
-        return id + " | " + customerName + " | " + total;
+        return id + " | " + customerName + " | " + status + " | " + total;
     }
 }

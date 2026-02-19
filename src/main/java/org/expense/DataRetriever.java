@@ -82,4 +82,29 @@ public class DataRetriever {
         }
         return totals;
     }
+
+    public InvoiceStatusTotals computeStatusTotals() {
+        InvoiceStatusTotals totals = null;
+        String sql = "SELECT " +
+                "    SUM(CASE WHEN i.status = 'PAID' THEN il.quantity * il.unit_price ELSE 0 END) AS total_paid, " +
+                "    SUM(CASE WHEN i.status = 'CONFIRMED' THEN il.quantity * il.unit_price ELSE 0 END) AS total_confirmed, " +
+                "    SUM(CASE WHEN i.status = 'DRAFT' THEN il.quantity * il.unit_price ELSE 0 END) AS total_draft " +
+                "FROM " +
+                "    invoice i " +
+                "LEFT JOIN " +
+                "    invoice_line il ON i.id = il.invoice_id;";
+        try (Connection connection = new DbConnection().getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                BigDecimal totalPaid = rs.getBigDecimal("total_paid");
+                BigDecimal totalConfirmed = rs.getBigDecimal("total_confirmed");
+                BigDecimal totalDraft = rs.getBigDecimal("total_draft");
+                totals = new InvoiceStatusTotals(totalPaid, totalConfirmed, totalDraft);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return totals;
+    }
 }
